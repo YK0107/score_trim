@@ -8,23 +8,18 @@
 
 ```sh
 # フォルダ (サブフォルダ内のPDFも対象)
-cd ~/Documents/Python/GM9
 uv run score_trim.py raw
 
 # ファイル1つ
-cd ~/Documents/Python/GM9
 uv run score_trim.py raw/マラ9管打楽譜/Mahler9_Fl.pdf
 
 # 複数ファイル (絶対パス)
-cd ~/Documents/Python/GM9
 uv run score_trim.py ~/Downloads/a.pdf ~/Downloads/b.pdf
 
 # フォルダとファイルの混在
-cd ~/Documents/Python/GM9
 uv run score_trim.py raw/マラ9管打楽譜 extra.pdf
 
 # 引数なし: フォルダ選択ダイアログ
-cd ~/Documents/Python/GM9
 uv run score_trim.py
 ```
 

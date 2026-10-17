@@ -1,5 +1,5 @@
 [project]
-name = "gm9"
+name = "score_trim"
 version = "0.1.0"
 requires-python = ">=3.14"
 dependencies = [
