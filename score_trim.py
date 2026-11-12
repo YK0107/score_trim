@@ -5,8 +5,8 @@ from tkinter import filedialog, messagebox
 
 import pymupdf
 
-ROTATE = 90  # 右に90度
-ROTATE_ONLY_LANDSCAPE = True  # True: 横長ページのPDFだけ回転 (縦長のファイルは t で切替)
+ROTATE = 90  # 開いた直後の回転 (右に90度)。以降は回転ボタン / [ ] で変更
+ROTATE_ONLY_LANDSCAPE = True  # True: 横長ページのPDFだけ最初に回転
 
 # 枠はA4縦の比率 (幅:高さ = 1:√2) に固定。回転"後"の見た目基準で
 # (高さ = ページ高さに対する割合, 縦位置 0=上寄せ 0.5=中央 1=下寄せ)。横は中央。
@@ -102,7 +102,8 @@ class App:
         tk.Button(bar, text="◀", command=lambda: self.go(-1)).pack(side="left")
         tk.Button(bar, text="▶", command=lambda: self.go(1)).pack(side="left")
         tk.Button(bar, text="次ファイル ▶▶", command=lambda: self.go_file(1)).pack(side="left")
-        tk.Button(bar, text="回転切替 (t)", command=self.toggle_rotate).pack(side="left")
+        tk.Button(bar, text="⟲ 左90° ([)", command=lambda: self.rotate_by(-90)).pack(side="left")
+        tk.Button(bar, text="⟳ 右90° (])", command=lambda: self.rotate_by(90)).pack(side="left")
         for k, name in enumerate(PRESETS, 1):
             tk.Button(bar, text=f"{k}: {name}", command=lambda n=name: self.set_preset(n)).pack(side="left")
         tk.Button(bar, text="同じ奇偶へコピー (a)", command=self.copy_parity).pack(side="left")
@@ -117,7 +118,8 @@ class App:
         root.bind("s", lambda e: self.save())
         root.bind("n", lambda e: self.go_file(1))
         root.bind("p", lambda e: self.go_file(-1))
-        root.bind("t", lambda e: self.toggle_rotate())
+        root.bind("[", lambda e: self.rotate_by(-90))
+        root.bind("]", lambda e: self.rotate_by(90))
         self.canvas.bind("<ButtonPress-1>", self.on_press)
         self.canvas.bind("<B1-Motion>", self.on_move)
         for b in ("<ButtonPress-2>", "<ButtonPress-3>"):  # macOSは2、他は3が右クリック
@@ -162,9 +164,12 @@ class App:
             self.load(sel[0])
         self.root.focus_set()
 
-    def toggle_rotate(self):
-        self.state[self.path] = [0 if self.rotate else ROTATE, None]  # 寸法が変わるので枠は作り直し
+    def rotate_by(self, d):
+        idx = self.idx
+        self.state[self.path] = [(self.rotate + d) % 360, None]  # 寸法が変わるので枠は作り直し
         self.load(self.fidx)
+        self.idx = idx  # 表示中のページを保つ
+        self.render()
 
     # --- 表示 ---
     def render(self):
