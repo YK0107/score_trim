@@ -5,9 +5,6 @@ from tkinter import filedialog, messagebox
 
 import pymupdf
 
-ROTATE = 90  # 開いた直後の回転 (右に90度)。以降は回転ボタン / [ ] で変更
-ROTATE_ONLY_LANDSCAPE = True  # True: 横長ページのPDFだけ最初に回転
-
 # 枠はA4縦の比率 (幅:高さ = 1:√2) に固定。回転"後"の見た目基準で
 # (高さ = ページ高さに対する割合, 縦位置 0=上寄せ 0.5=中央 1=下寄せ)。横は中央。
 A4_RATIO = 2 ** 0.5
@@ -27,13 +24,6 @@ def open_rotated(path, rotate):
     for page in doc:
         page.set_rotation((page.rotation + rotate) % 360)
     return doc
-
-
-def initial_rotate(path):
-    if not ROTATE_ONLY_LANDSCAPE:
-        return ROTATE
-    with pymupdf.open(path) as doc:
-        return ROTATE if doc[0].rect.width > doc[0].rect.height else 0
 
 
 def a4_frame(rect, h, cx, cy):
@@ -135,7 +125,7 @@ class App:
         self.fidx = fidx
         self.path = self.files[fidx]
         if self.path not in self.state:
-            self.state[self.path] = [initial_rotate(self.path), None]
+            self.state[self.path] = [0, None]  # 開いた直後は元の向き。回転はボタン / [ ] で
         self.rotate = self.state[self.path][0]
         self.doc = open_rotated(self.path, self.rotate)
         if self.state[self.path][1] is None:  # 回転後のページ寸法で枠を作る
